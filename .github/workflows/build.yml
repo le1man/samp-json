@@ -1,0 +1,126 @@
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-windows:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [windows-2019]
+        build_type: [Release, Debug]
+        arch: [x86]
+        include:
+          - os: windows-2019
+            c_compiler: clang
+            cpp_compiler: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update submodules recursively
+        run: git submodule update --init --recursive
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
+          echo "artifact-name=build-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Boost on Windows
+        run: |
+          echo "Downloading and installing Boost..."
+          Invoke-WebRequest -Uri "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.zip" -OutFile "boost.zip"
+          Expand-Archive -Path "boost.zip" -DestinationPath "."
+          Remove-Item boost.zip
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} `
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DBOOST_ROOT="${{ github.workspace }}/boost_1_86_0" `
+            -G "Visual Studio 16 2019" `
+            -A Win32 `
+            -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.strings.outputs.artifact-name }}
+          path: ${{ steps.strings.outputs.build-output-dir }}
+
+  build-linux:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-22.04]
+        build_type: [Release, Debug]
+        arch: [x86]
+        include:
+          - os: ubuntu-22.04
+            c_compiler: clang
+            cpp_compiler: clang++
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update submodules recursively
+        run: git submodule update --init --recursive
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
+          echo "artifact-name=build-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Boost on Linux
+        run: |
+          echo "Downloading and installing Boost..."
+          wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz
+          tar -xvzf boost_1_86_0.tar.gz
+          rm -rf boost_1_86_0.tar.gz
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
+            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} `
+            -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} `
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+            -DBOOST_ROOT="${{ github.workspace }}/boost_1_86_0" `
+            -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.strings.outputs.artifact-name }}
+          path: ${{ steps.strings.outputs.build-output-dir }}

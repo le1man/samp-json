@@ -174,3 +174,5 @@ FakesAssemblies/
 
 # Others
 *.o
+
+.vscode/

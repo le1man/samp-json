@@ -4,6 +4,6 @@
 
 native json_decode(json_data[]);
 native json_get_int(id, key[]);
-native json_get_string(id, key[], value[], value_length);
+native bool:json_get_string(id, key[], value[], value_length = sizeof(value));
 native Float:json_get_float(id, key[]);
 native json_delete(id);
