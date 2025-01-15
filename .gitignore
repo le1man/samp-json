@@ -176,3 +176,5 @@ FakesAssemblies/
 *.o
 
 .vscode/
+
+.DS_Store
