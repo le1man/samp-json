@@ -16,7 +16,7 @@ native json_delete(id);
 can be used as follows:
 ```Pawn
 main(){
-    new id_decode = json_decode("{"key_int": 1234, "key_string":"hello, world!", "key_float": 1.0000}");
+    new id_decode = json_decode("{\"key_int\": 1234, \"key_string\": \"hello, world!\", \"key_float\": 1.0000}");
     if(id_decode != 0){
         printf("%d", json_get_int(id_decode, "key_int")); // json_get_int may return -1 if its extraction fails. but -1 may also return as a valid value, make sure your JSON does not use the value -1
         new str[16];
