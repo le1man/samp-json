@@ -1,6 +1,8 @@
 # samp-json
 A JSON implementation for SA:MP Open.MP Server.
 
+[![CMake on multiple platforms](https://github.com/le1man/samp-json/actions/workflows/build.yml/badge.svg)](https://github.com/le1man/samp-json/actions/workflows/build.yml)
+
 ### Using the plugin
 There are the following native functions:
 ```SourcePawn
