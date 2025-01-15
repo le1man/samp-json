@@ -99,12 +99,8 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           echo "artifact-name=build-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
 
-      - name: Install Boost on Linux
-        run: |
-          echo "Downloading and installing Boost..."
-          wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz
-          tar -xvzf boost_1_86_0.tar.gz
-          rm -rf boost_1_86_0.tar.gz
+      - name: Install required packages
+        run: sudo apt-get install libboost-all-dev -y
 
       - name: Configure CMake
         shell: pwsh
