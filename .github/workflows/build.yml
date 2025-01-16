@@ -39,15 +39,8 @@ jobs:
           echo "build-output-dir=${{ github.workspace }}/build/${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           echo "artifact-name=build-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
 
-      - name: Set up vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          ./vcpkg/bootstrap-vcpkg.sh
-          echo "::add-path::./vcpkg"
-
       - name: Install required packages
-        run: |
-          ./vcpkg/vcpkg install boost
+        run: choco install boost-msvc-14.1 -y
 
       - name: Configure CMake
         shell: pwsh
@@ -56,7 +49,6 @@ jobs:
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} `
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} `
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
-            -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake `
             -G "Visual Studio 16 2019" `
             -A Win32 `
             -S ${{ github.workspace }}

@@ -16,7 +16,7 @@ add_definitions(
 	-DPAWN_CELL_SIZE=32
 )
 
-find_package(Boost 1.74 REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 set(json_spirit_cpp
