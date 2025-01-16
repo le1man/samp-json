@@ -19,6 +19,10 @@ add_definitions(
 find_package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
+if(WIN32)
+	add_compile_options(/bigobj)
+endif()
+
 set(json_spirit_cpp
     json_spirit/json_spirit_reader.cpp
     json_spirit/json_spirit_writer.cpp
@@ -29,7 +33,9 @@ add_library(json_spirit STATIC ${json_spirit_cpp})
 target_compile_features(json_spirit PUBLIC cxx_std_11)
 target_include_directories(json_spirit PUBLIC ${Boost_INCLUDE_DIRS})
 if(WIN32)
-	target_compile_options(json_spirit PRIVATE -O3)
+	if(CMAKE_BUILD_TYPE MATCHES "Release")
+		target_compile_options(json_spirit PRIVATE /Ox)
+	endif()
 else()
 	target_compile_options(json_spirit PRIVATE -O3 -fPIC)
 endif()
@@ -37,7 +43,9 @@ target_link_libraries(json_spirit PRIVATE ${Boost_LIBRARIES})
 
 add_library(${PROJECT_NAME} SHARED main.cpp)
 if(WIN32)
-	target_compile_options(${PROJECT_NAME} PRIVATE -O2)
+	if(CMAKE_BUILD_TYPE MATCHES "Release")
+		target_compile_options(${PROJECT_NAME} PRIVATE /O2)
+	endif()
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -O2 -fPIC -fshort-wchar)
 endif()
