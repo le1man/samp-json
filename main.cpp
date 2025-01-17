@@ -6,9 +6,21 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "json_spirit/json_spirit.h"
 #include "settings.h"
+
+std::string readFileToString(const std::string &filePath) {
+    std::ifstream file(filePath, std::ios::in | std::ios::binary);
+
+    if (!file) {
+        return "#E:1";
+    }
+
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return content;
+}
 
 struct t_JsonData
 {
@@ -117,6 +129,24 @@ public:
 COMPONENT_ENTRY_POINT()
 {
     return new SampJson();
+}
+
+SCRIPT_API(json_decode_from_file, int(std::string const& path_file)) {
+    std::string content = readFileToString(std::string("./scriptfiles/") + path_file);
+
+    if (content.find("#E:1") != std::string::npos)
+        return -1;
+
+    json_spirit::Value value;
+    auto success = json_spirit::read(content, value);
+
+    if (success == false)
+        return 0;
+
+    ++json_data_id;
+    json_data.push_back({ json_data_id, value.get_obj() });
+
+    return json_data_id;
 }
 
 SCRIPT_API(json_decode, int(std::string const &json_string))
